@@ -15,8 +15,10 @@ My weekly assignments and projects are organized as follows:
 
 ```text
 Agentic-AI-Enabled-Website
- ┣ Week-1-HTML-CSS
- ┃ ┣ index.html
- ┃ ┣ style.css
- ┣
- ┗ 
+ Week1/
+ ├── index.html
+ └── style.css
+ Week2/
+ ├── index.html
+ ├── style.css
+ └── script.js
