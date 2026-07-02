@@ -22,3 +22,11 @@ Agentic-AI-Enabled-Website
  ├── index.html
  ├── style.css
  └── script.js
+ Week3/
+ ├── index.html
+ ├── style.css
+ ├── script.js
+ ├── package.json
+ ├── package-lock.json
+ ├── .gitignore
+ └── node_modules

@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>Smart Task Planner</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <div class="container">
+        <h1>Smart Task Planner</h1>
+        <p>Enter a goal and let AI break it down into actionable steps!</p>
+
+        <div class="input-group">
+            <input type="text" id="goal-input" placeholder="e.g., Planning a trip ...">
+            <button id="generate-btn">Generate Plan</button>
+        </div>
+
+        <div id="loading-state" class="hidden">
+            <div class="spinner"></div>
+            <p>Consulting Gemini API...</p>
+        </div>
+
+        <div id="task-container"></div>
+    </div>
+
+    <script type="module" src="script.js"></script>
+</body>
+
+</html>
