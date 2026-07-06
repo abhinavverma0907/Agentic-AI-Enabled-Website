@@ -1,7 +1,3 @@
-import { GoogleGenAI } from "@google/genai";
-
-const ai = new GoogleGenAI({ apiKey: import.meta.env.VITE_API_KEY });
-
 const generateBtn = document.getElementById("generate-btn");
 const goalInput = document.getElementById("goal-input");
 const taskContainer = document.getElementById("task-container");
@@ -21,31 +17,12 @@ generateBtn.addEventListener("click", async () => {
     try {
         const prompt = `I want to achieve this goal: "${goal}". Break this down into a step-by-step plan.`;
 
-        const response = await ai.models.generateContent({
-            model: "gemini-2.5-flash",
-            contents: prompt,
-            config: {
-                responseMimeType: "application/json",
-                responseSchema: {
-                    type: "OBJECT",
-                    properties: {
-                        tasks: {
-                            type: "ARRAY",
-                            items: {
-                                type: "OBJECT",
-                                properties: {
-                                    task_name: { type: "STRING" },
-                                    priority: { type: "STRING" },
-                                    estimated_time: { type: "STRING" }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
+        const response = await fetch("/api/generate", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ goal })
         });
-
-        const data = JSON.parse(response.text);
+        const data = await response.json();
 
         loadingState.classList.add("hidden");
 
