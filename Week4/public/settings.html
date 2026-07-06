@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Settings - Customize your FinanceTracker preferences, budget, currency and theme.">
+  <title>Settings | FinanceTracker</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <button class="mobile-toggle" onclick="document.querySelector('.sidebar').classList.toggle('open')">☰</button>
+  <nav class="sidebar">
+    <div class="sidebar-brand">
+      <div class="brand-icon">💰</div>
+      <span class="brand-text">FinanceTracker</span>
+    </div>
+    <div class="sidebar-nav">
+      <div class="nav-section-title">Overview</div>
+      <a href="dashboard.html" class="nav-link"><span class="nav-icon">📊</span> Dashboard</a>
+      <a href="add-transaction.html" class="nav-link"><span class="nav-icon">➕</span> Add Transaction</a>
+      <a href="history.html" class="nav-link"><span class="nav-icon">📋</span> History</a>
+      <div class="nav-section-title">Insights</div>
+      <a href="reports.html" class="nav-link"><span class="nav-icon">📈</span> Reports</a>
+      <a href="assistant.html" class="nav-link"><span class="nav-icon">🤖</span> AI Assistant</a>
+      <div class="nav-section-title">Preferences</div>
+      <a href="settings.html" class="nav-link active"><span class="nav-icon">⚙️</span> Settings</a>
+    </div>
+  </nav>
+
+  <main class="main-content">
+    <div class="page-header">
+      <h1>Settings</h1>
+      <p class="page-subtitle">Customize your finance tracker</p>
+    </div>
+
+    <!-- General Settings Card -->
+    <div class="card mb-lg">
+      <div class="card-header">
+        <h2 class="card-title">General Settings</h2>
+      </div>
+      <div class="card-body">
+        <div class="settings-row">
+          <div class="settings-info">
+            <h4>Monthly Budget</h4>
+            <p>Set your monthly spending limit</p>
+          </div>
+          <input type="number" id="budget-input" class="form-input" style="width:150px" placeholder="0" min="0">
+        </div>
+        <div class="settings-row">
+          <div class="settings-info">
+            <h4>Currency Symbol</h4>
+            <p>Choose your preferred currency</p>
+          </div>
+          <select id="currency-select" class="form-select" style="width:150px">
+            <option value="₹">₹ INR</option>
+            <option value="$">$ USD</option>
+            <option value="€">€ EUR</option>
+            <option value="£">£ GBP</option>
+            <option value="¥">¥ JPY</option>
+          </select>
+        </div>
+        <div class="settings-row">
+          <div class="settings-info">
+            <h4>Dark Mode</h4>
+            <p>Toggle dark theme appearance</p>
+          </div>
+          <label class="toggle-switch">
+            <input type="checkbox" id="darkmode-toggle">
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+        <button id="save-btn" class="btn btn-primary btn-lg btn-block mt-lg">💾 Save Settings</button>
+      </div>
+    </div>
+
+    <!-- Danger Zone Card -->
+    <div class="card">
+      <div class="card-header">
+        <h2 class="card-title text-expense">Danger Zone</h2>
+      </div>
+      <div class="card-body">
+        <div class="settings-row">
+          <div class="settings-info">
+            <h4>Reset All Data</h4>
+            <p>This will permanently delete all your transactions and settings</p>
+          </div>
+          <button id="reset-btn" class="btn btn-danger">🗑️ Reset Everything</button>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Confirm Reset Modal -->
+  <div class="modal-overlay hidden" id="confirm-modal">
+    <div class="modal-box">
+      <h3>Are you sure?</h3>
+      <p>This will delete all transactions and reset settings. This action cannot be undone.</p>
+      <div class="modal-actions">
+        <button id="modal-cancel" class="btn btn-ghost">Cancel</button>
+        <button id="modal-confirm" class="btn btn-danger">Yes, Reset</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Container -->
+  <div class="toast-container" id="toast-container"></div>
+
+  <script src="js/storage.js"></script>
+  <script>
+    // --- Toast Notification ---
+    function showToast(message, type = 'success') {
+      const container = document.getElementById('toast-container');
+      const toast = document.createElement('div');
+      toast.className = `toast toast-${type}`;
+      toast.textContent = message;
+      container.appendChild(toast);
+
+      // Trigger reflow for animation
+      toast.offsetHeight;
+      toast.classList.add('toast-visible');
+
+      setTimeout(() => {
+        toast.classList.remove('toast-visible');
+        setTimeout(() => toast.remove(), 300);
+      }, 2500);
+    }
+
+    // --- DOM References ---
+    const budgetInput = document.getElementById('budget-input');
+    const currencySelect = document.getElementById('currency-select');
+    const darkmodeToggle = document.getElementById('darkmode-toggle');
+    const saveBtn = document.getElementById('save-btn');
+    const resetBtn = document.getElementById('reset-btn');
+    const confirmModal = document.getElementById('confirm-modal');
+    const modalCancel = document.getElementById('modal-cancel');
+    const modalConfirm = document.getElementById('modal-confirm');
+
+    // --- Load Settings ---
+    function loadSettings() {
+      const settings = getSettings();
+      budgetInput.value = settings.budget || '';
+      currencySelect.value = settings.currency;
+      darkmodeToggle.checked = settings.darkMode;
+      applyDarkMode(settings.darkMode);
+    }
+
+    // --- Dark Mode ---
+    function applyDarkMode(enabled) {
+      if (enabled) {
+        document.body.classList.add('dark-mode');
+      } else {
+        document.body.classList.remove('dark-mode');
+      }
+    }
+
+    darkmodeToggle.addEventListener('change', function () {
+      applyDarkMode(this.checked);
+      // Automatically save theme change
+      const settings = getSettings();
+      settings.darkMode = this.checked;
+      saveSettings(settings);
+    });
+
+    // --- Save Settings ---
+    saveBtn.addEventListener('click', function () {
+      const settings = {
+        budget: parseFloat(budgetInput.value) || 0,
+        currency: currencySelect.value,
+        darkMode: darkmodeToggle.checked
+      };
+      saveSettings(settings);
+      showToast('Settings saved successfully!', 'success');
+    });
+
+    // --- Reset ---
+    resetBtn.addEventListener('click', function () {
+      confirmModal.classList.remove('hidden');
+    });
+
+    modalCancel.addEventListener('click', function () {
+      confirmModal.classList.add('hidden');
+    });
+
+    confirmModal.addEventListener('click', function (e) {
+      if (e.target === confirmModal) {
+        confirmModal.classList.add('hidden');
+      }
+    });
+
+    modalConfirm.addEventListener('click', function () {
+      clearTransactions();
+      saveSettings({ budget: 0, currency: '₹', darkMode: false });
+      confirmModal.classList.add('hidden');
+      showToast('All data has been reset.', 'success');
+      setTimeout(() => location.reload(), 1000);
+    });
+
+    // --- Init ---
+    document.addEventListener('DOMContentLoaded', loadSettings);
+  </script>
+
+</body>
+</html>

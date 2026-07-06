@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="View and manage all your transaction history in Finance Tracker">
+  <title>Transaction History | FinanceTracker</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <button class="mobile-toggle" onclick="document.querySelector('.sidebar').classList.toggle('open')">☰</button>
+  <nav class="sidebar">
+    <div class="sidebar-brand">
+      <div class="brand-icon">💰</div>
+      <span class="brand-text">FinanceTracker</span>
+    </div>
+    <div class="sidebar-nav">
+      <div class="nav-section-title">Overview</div>
+      <a href="dashboard.html" class="nav-link"><span class="nav-icon">📊</span> Dashboard</a>
+      <a href="add-transaction.html" class="nav-link"><span class="nav-icon">➕</span> Add Transaction</a>
+      <a href="history.html" class="nav-link active"><span class="nav-icon">📋</span> History</a>
+      <div class="nav-section-title">Insights</div>
+      <a href="reports.html" class="nav-link"><span class="nav-icon">📈</span> Reports</a>
+      <a href="assistant.html" class="nav-link"><span class="nav-icon">🤖</span> AI Assistant</a>
+      <div class="nav-section-title">Preferences</div>
+      <a href="settings.html" class="nav-link"><span class="nav-icon">⚙️</span> Settings</a>
+    </div>
+  </nav>
+
+  <main class="main-content">
+    <div class="page-header">
+      <h1>Transaction History</h1>
+      <p class="page-subtitle">View and manage all your transactions</p>
+    </div>
+
+    <div class="toolbar">
+      <input type="text" id="search-input" class="form-input" placeholder="Search transactions...">
+      <select id="filter-type" class="form-select">
+        <option value="all">All</option>
+        <option value="income">Income Only</option>
+        <option value="expense">Expense Only</option>
+      </select>
+    </div>
+
+    <div class="card">
+      <div class="table-responsive">
+        <table class="data-table" id="transactions-table">
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Description</th>
+              <th>Category</th>
+              <th>Type</th>
+              <th>Amount</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="transactions-body">
+          </tbody>
+        </table>
+      </div>
+      <div id="empty-state" class="empty-state" style="display:none;">
+        <div class="empty-state-icon">📭</div>
+        <h3 class="empty-state-title">No transactions found</h3>
+        <p class="empty-state-text">Start by adding a new transaction or adjust your filters.</p>
+        <a href="add-transaction.html" class="btn btn-primary">Add Transaction</a>
+      </div>
+    </div>
+  </main>
+
+  <div id="toast-container" class="toast-container"></div>
+
+  <script src="js/storage.js"></script>
+  <script>
+    const searchInput = document.getElementById('search-input');
+    const filterType = document.getElementById('filter-type');
+    const tbody = document.getElementById('transactions-body');
+    const table = document.getElementById('transactions-table');
+    const emptyState = document.getElementById('empty-state');
+
+    // Toast notification system
+    function showToast(message, type = 'success') {
+      const container = document.getElementById('toast-container');
+      const toast = document.createElement('div');
+      toast.className = `toast toast-${type}`;
+      toast.textContent = message;
+      container.appendChild(toast);
+
+      toast.offsetHeight;
+      toast.classList.add('toast-visible');
+
+      setTimeout(() => {
+        toast.classList.remove('toast-visible');
+        setTimeout(() => toast.remove(), 300);
+      }, 3000);
+    }
+
+    // Format currency
+    function formatCurrency(amount) {
+      const settings = getSettings();
+      const symbol = settings.currency === 'USD' ? '$' : settings.currency === 'EUR' ? '€' : settings.currency === 'GBP' ? '£' : '₹';
+      return symbol + parseFloat(amount).toFixed(2);
+    }
+
+    // Format date
+    function formatDate(dateStr) {
+      const date = new Date(dateStr);
+      return date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+    }
+
+    // Render transactions
+    function renderTransactions() {
+      const transactions = getTransactions();
+      const searchTerm = searchInput.value.toLowerCase().trim();
+      const typeFilter = filterType.value;
+
+      const filtered = transactions.filter(t => {
+        const matchesSearch = t.description.toLowerCase().includes(searchTerm);
+        const matchesType = typeFilter === 'all' || t.type === typeFilter;
+        return matchesSearch && matchesType;
+      });
+
+      // Sort by date descending
+      filtered.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+      tbody.innerHTML = '';
+
+      if (filtered.length === 0) {
+        table.classList.add('hidden');
+        emptyState.style.display = '';
+        return;
+      }
+
+      table.classList.remove('hidden');
+      emptyState.style.display = 'none';
+
+      filtered.forEach(t => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td>${formatDate(t.date)}</td>
+          <td>${t.description}</td>
+          <td>${t.category}</td>
+          <td><span class="badge badge-${t.type}">${t.type.charAt(0).toUpperCase() + t.type.slice(1)}</span></td>
+          <td class="amount-${t.type}">${t.type === 'income' ? '+' : '-'}${formatCurrency(t.amount)}</td>
+          <td><button class="btn btn-danger btn-sm" onclick="handleDelete('${t.id}')">Delete</button></td>
+        `;
+        tbody.appendChild(row);
+      });
+    }
+
+    // Handle delete
+    function handleDelete(id) {
+      deleteTransaction(id);
+      renderTransactions();
+      showToast('Transaction deleted successfully.', 'success');
+    }
+
+    // Event listeners
+    searchInput.addEventListener('input', renderTransactions);
+    filterType.addEventListener('change', renderTransactions);
+
+    // Initial render
+    renderTransactions();
+  </script>
+</body>
+</html>

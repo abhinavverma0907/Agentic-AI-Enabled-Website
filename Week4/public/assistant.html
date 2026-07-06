@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Finance Tracker AI Assistant - Get personalized financial advice and answers powered by AI.">
+  <title>AI Assistant | FinanceTracker</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <button class="mobile-toggle" onclick="document.querySelector('.sidebar').classList.toggle('open')">☰</button>
+  <nav class="sidebar">
+    <div class="sidebar-brand">
+      <div class="brand-icon">💰</div>
+      <span class="brand-text">FinanceTracker</span>
+    </div>
+    <div class="sidebar-nav">
+      <div class="nav-section-title">Overview</div>
+      <a href="dashboard.html" class="nav-link"><span class="nav-icon">📊</span> Dashboard</a>
+      <a href="add-transaction.html" class="nav-link"><span class="nav-icon">➕</span> Add Transaction</a>
+      <a href="history.html" class="nav-link"><span class="nav-icon">📋</span> History</a>
+      <div class="nav-section-title">Insights</div>
+      <a href="reports.html" class="nav-link"><span class="nav-icon">📈</span> Reports</a>
+      <a href="assistant.html" class="nav-link active"><span class="nav-icon">🤖</span> AI Assistant</a>
+      <div class="nav-section-title">Preferences</div>
+      <a href="settings.html" class="nav-link"><span class="nav-icon">⚙️</span> Settings</a>
+    </div>
+  </nav>
+
+  <main class="main-content">
+    <div class="page-header">
+      <h1>AI Assistant</h1>
+      <p class="page-subtitle">Ask anything about your finances</p>
+    </div>
+
+    <div class="card">
+      <div class="chat-container" id="chat-container">
+        <div class="chat-message ai">
+          <div class="chat-avatar">🤖</div>
+          <div class="chat-bubble">👋 Hi! I'm your AI financial assistant. I can help you understand your spending habits, suggest ways to save money, create budgets, and answer any questions about your finances. Just type your question below!</div>
+        </div>
+      </div>
+      <div class="chat-input-area">
+        <input type="text" class="chat-input" id="chat-input" placeholder="Ask about your finances...">
+        <button class="btn btn-primary" id="send-btn">📤</button>
+      </div>
+    </div>
+  </main>
+
+  <script src="js/storage.js"></script>
+  <script src="js/ai.js"></script>
+  <script>
+    (function () {
+      const chatContainer = document.getElementById('chat-container');
+      const chatInput = document.getElementById('chat-input');
+      const sendBtn = document.getElementById('send-btn');
+      const settings = getSettings();
+      const currency = settings.currency || '$';
+
+      function formatCurrency(amount) {
+        return currency + Math.abs(amount).toFixed(2);
+      }
+
+      function scrollToBottom() {
+        chatContainer.scrollTop = chatContainer.scrollHeight;
+      }
+
+      function addMessage(content, type) {
+        var msg = document.createElement('div');
+        msg.className = 'chat-message ' + type;
+
+        var avatar = document.createElement('div');
+        avatar.className = 'chat-avatar';
+        avatar.textContent = type === 'user' ? '👤' : '🤖';
+
+        var bubble = document.createElement('div');
+        bubble.className = 'chat-bubble';
+        bubble.innerHTML = content;
+
+        msg.appendChild(avatar);
+        msg.appendChild(bubble);
+        chatContainer.appendChild(msg);
+        scrollToBottom();
+
+        return msg;
+      }
+
+      function addLoadingMessage() {
+        var msg = document.createElement('div');
+        msg.className = 'chat-message ai';
+        msg.id = 'loading-message';
+
+        var avatar = document.createElement('div');
+        avatar.className = 'chat-avatar';
+        avatar.textContent = '🤖';
+
+        var bubble = document.createElement('div');
+        bubble.className = 'chat-bubble';
+
+        var spinner = document.createElement('div');
+        spinner.className = 'loading-spinner';
+        bubble.appendChild(spinner);
+
+        msg.appendChild(avatar);
+        msg.appendChild(bubble);
+        chatContainer.appendChild(msg);
+        scrollToBottom();
+
+        return msg;
+      }
+
+      function buildContext() {
+        var balance = getBalance();
+        var income = getTotalIncome();
+        var expenses = getTotalExpenses();
+        var categories = getCategoryTotals();
+        var transactions = getTransactions();
+        var recent = transactions.slice(-10);
+
+        var catStr = Object.keys(categories).map(function (cat) {
+          return cat + ': ' + formatCurrency(categories[cat]);
+        }).join(', ');
+
+        var txStr = recent.map(function (tx) {
+          return tx.date + ' - ' + tx.description + ' (' + tx.type + '): ' + formatCurrency(tx.amount) + ' [' + tx.category + ']';
+        }).join('; ');
+
+        return 'Financial context - Balance: ' + formatCurrency(balance) +
+          ', Income: ' + formatCurrency(income) +
+          ', Expenses: ' + formatCurrency(expenses) +
+          '. Categories: ' + (catStr || 'None') +
+          '. Recent transactions: ' + (txStr || 'None') + '. ';
+      }
+
+      async function handleSend() {
+        var message = chatInput.value.trim();
+        if (!message) return;
+
+        addMessage(message, 'user');
+        chatInput.value = '';
+
+        sendBtn.disabled = true;
+        chatInput.disabled = true;
+
+        var loadingMsg = addLoadingMessage();
+
+        var context = buildContext();
+        var prompt = context + 'User question: ' + message;
+
+        try {
+          var response = await askAI(prompt);
+          loadingMsg.remove();
+          addMessage(response.replace(/\n/g, '<br>'), 'ai');
+        } catch (err) {
+          loadingMsg.remove();
+          addMessage('Sorry, I encountered an error. Please try again.', 'ai');
+        }
+
+        sendBtn.disabled = false;
+        chatInput.disabled = false;
+        chatInput.focus();
+      }
+
+      sendBtn.addEventListener('click', handleSend);
+
+      chatInput.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter') {
+          handleSend();
+        }
+      });
+
+      chatInput.focus();
+    })();
+  </script>
+
+</body>
+</html>
