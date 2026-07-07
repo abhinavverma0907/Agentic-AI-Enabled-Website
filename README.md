@@ -1,32 +1,85 @@
-# Agentic AI Enabled Website 
+# Agentic AI Enabled Website
 
-Welcome to my assignment tracking repository for the **Agentic AI Enabled Website** track, part of the **LearnerSpace 2026** program by the ITC Web Team. 
+This repository contains my learning journey for the **Agentic AI Enabled Website** track under the **LearnerSpace 2026** program by the ITC Web Team.
 
-This repository contains my weekly progress, experiments, and project submissions as I learn web development, starting from the foundational building blocks of the internet to integrating agentic AI.
-Project Repo : https://github.com/ITC-Web-Team/LearnerSpace-2026.git
+It starts with the fundamentals of web development and gradually moves into building an AI-enabled finance tracker application.
 
-## Author
-**Abhinav Verma**  
-[GitHub Profile](https://github.com/abhinavverma0907) | [Repository Link](https://github.com/abhinavverma0907/Agentic-AI-Enabled-Website)
+## Project Overview
 
-## 📂 Folder Structure
+The repository is organized into four weekly projects:
 
-My weekly assignments and projects are organized as follows:
+- **Week 1**: Basic static website using HTML and CSS
+- **Week 2**: Interactive webpage with JavaScript
+- **Week 3**: Node.js and Express server with AI integration basics
+- **Week 4**: Final project — a multi-page finance tracker with transaction management, reports, and AI assistance
+
+## Folder Structure
 
 ```text
-Agentic-AI-Enabled-Website
- Week1/
- ├── index.html
- └── style.css
- Week2/
- ├── index.html
- ├── style.css
- └── script.js
- Week3/
- ├── index.html
- ├── style.css
- ├── script.js
- ├── package.json
- ├── package-lock.json
- ├── .gitignore
- └── node_modules
+Agentic-AI-Enabled-Website/
+├── Week1/
+│   ├── index.html
+│   └── style.css
+├── Week2/
+│   ├── index.html
+│   ├── style.css
+│   └── script.js
+├── Week3/
+│   ├── index.html
+│   ├── style.css
+│   ├── script.js
+│   ├── server.js
+│   └── package.json
+└── Week4/
+    ├── package.json
+    ├── server.js
+    ├── public/
+    │   ├── add-transaction.html
+    │   ├── assistant.html
+    │   ├── dashboard.html
+    │   ├── history.html
+    │   ├── index.html
+    │   ├── reports.html
+    │   ├── settings.html
+    │   ├── css/
+    │   └── js/
+```
+
+## Week 4 Final Project
+
+The Week 4 project is a **Finance Tracker Website** that allows users to:
+
+- Add income and expense transactions
+- View balance, income, and expenses
+- Review transaction history
+- See spending reports with charts
+- Ask an AI assistant for finance-related guidance
+
+## Run the Week 4 Project
+
+1. Open the terminal inside the Week4 folder.
+2. Install dependencies:
+   ```bash
+   npm install
+   ```
+3. Create a `.env` file using the example file and add your Gemini API key.
+4. Start the server:
+   ```bash
+   npm start
+   ```
+5. Open your browser at:
+   ```text
+   http://localhost:3000
+   ```
+
+## Author
+
+**Abhinav Verma**
+
+- [GitHub Profile](https://github.com/abhinavverma0907)
+- [Repository Link](https://github.com/abhinavverma0907/Agentic-AI-Enabled-Website)
+
+## Reference
+
+Original course repository:
+https://github.com/ITC-Web-Team/LearnerSpace-2026.git
